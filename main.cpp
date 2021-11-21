@@ -19,7 +19,8 @@ int Speed = 20;
 int xscreen = SDL_WINDOWPOS_CENTERED;
 int yscreen = SDL_WINDOWPOS_CENTERED;
 
-int mouse_x, mouse_y;
+int x, y;
+short currentHoldObject = -1;
 
 bool mouseDown;
 
@@ -31,122 +32,7 @@ SDL_Rect P1;
 SDL_Rect P2;
 SDL_Rect P3;
 
-class Vector2
-{
-    int x, y;
-
-    Vector2(int = 0, int = 0);
-    ~Vector2();
-
-    inline Vector2 &Vector2::operator=(const Vector2 &v)
-    {
-        x = v.x;
-        y = v.y;
-        return *this;
-    }
-    inline Vector2 &Vector2::operator=(const int &f)
-    {
-        x = f;
-        y = f;
-        return *this;
-    }
-    inline Vector2 &Vector2::operator-(void)
-    {
-        x = -x;
-        y = -y;
-        return *this;
-    }
-    inline bool Vector2::operator==(const Vector2 &v) const { return (x == v.x) && (y == v.y); }
-    inline bool Vector2::operator!=(const Vector2 &v) const { return (x != v.x) || (y != v.y); }
-
-    // Vector2 and Vector2 Operations
-    inline const Vector2 Vector2::operator+(const Vector2 &v) const
-    {
-        return Vector2(x + v.x, y + v.y);
-    }
-    inline const Vector2 Vector2::operator-(const Vector2 &v) const
-    {
-        return Vector2(x - v.x, y - v.y);
-    }
-    inline const Vector2 Vector2::operator*(const Vector2 &v) const
-    {
-        return Vector2(x * v.x, y * v.y);
-    }
-    inline const Vector2 Vector2::operator/(const Vector2 &v) const
-    {
-        return Vector2(x / v.x, y / v.y);
-    }
-
-    inline Vector2 &Vector2::operator+=(const Vector2 &v)
-    {
-        x += v.x;
-        y += v.y;
-        return *this;
-    }
-    inline Vector2 &Vector2::operator-=(const Vector2 &v)
-    {
-        x -= v.x;
-        y -= v.y;
-        return *this;
-    }
-    inline Vector2 &Vector2::operator*=(const Vector2 &v)
-    {
-        x *= v.x;
-        y *= v.y;
-        return *this;
-    }
-    inline Vector2 &Vector2::operator/=(const Vector2 &v)
-    {
-        x /= v.x;
-        y /= v.y;
-        return *this;
-    }
-
-    // Vector2 Operations
-    inline const Vector2 Vector2::operator+(int v) const { return Vector2(x + v, y + v); }
-    inline const Vector2 Vector2::operator-(int v) const { return Vector2(x - v, y - v); }
-    inline const Vector2 Vector2::operator*(int v) const { return Vector2(x * v, y * v); }
-    inline const Vector2 Vector2::operator/(int v) const { return Vector2(x / v, y / v); }
-
-    // This Operations
-    inline Vector2 &Vector2::operator+=(int v)
-    {
-        x += v;
-        y += v;
-        return *this;
-    }
-    inline Vector2 &Vector2::operator-=(int v)
-    {
-        x -= v;
-        y -= v;
-        return *this;
-    }
-    inline Vector2 &Vector2::operator*=(int v)
-    {
-        x *= v;
-        y *= v;
-        return *this;
-    }
-    inline Vector2 &Vector2::operator/=(int v)
-    {
-        x /= v;
-        y /= v;
-        return *this;
-    }
-};
-
-Vector2::Vector2(int xVal = 0, int yVal = 0) : x(xVal), y(yVal){};
-
-class Bullet
-{
-    Vector2 Position;
-    Vector2 Velocity;
-    Vector2 Direction;
-    void Spawn()
-    {
-    }
-};
-
+void generateApple();
 
 void Initialize(const char *title, bool fullscreen);
 
@@ -167,7 +53,7 @@ int getPt(int n1, int n2, float perc)
 int main(int argc, char *argv[])
 {
 
-    Initialize("Shooter Test", false);
+    Initialize("Bezier Curves Visualizer", false);
 
     clock_t start, end;
 
@@ -227,6 +113,26 @@ void Initialize(const char *title, bool fullscreen)
 
         _isRunning = true;
     }
+
+    P0.w = 10;
+    P0.h = 10;
+    P0.x = windowWidth / 2 - 200;
+    P0.y = windowHeight / 2 + 100;
+
+    P1.w = 10;
+    P1.h = 10;
+    P1.x = windowWidth / 2 - 200;
+    P1.y = windowHeight / 2 - 100;
+
+    P2.w = 10;
+    P2.h = 10;
+    P2.x = windowWidth / 2 + 200;
+    P2.y = windowHeight / 2 - 100;
+
+    P3.w = 10;
+    P3.h = 10;
+    P3.x = windowWidth / 2 + 200;
+    P3.y = windowHeight / 2 + 100;
 };
 
 bool isRunning()
@@ -245,11 +151,12 @@ void handleEvents()
         _isRunning = false;
         break;
     case SDL_MOUSEBUTTONUP:
-
+    
         if (mouseDown == true)
         {
             mouseDown = false;
             std::cout << "mouse up\n";
+            currentHoldObject = -1;
         }
         break;
     case SDL_MOUSEBUTTONDOWN:
@@ -257,6 +164,29 @@ void handleEvents()
         {
             mouseDown = true;
             std::cout << "mouse down\n";
+
+            if (((x >= P0.x) && (x <= P0.x + P0.w)) && ((y >= P0.y) && y <= P0.y + P0.h))
+            {
+                currentHoldObject = 0;
+            }
+            else if (((x >= P1.x) && (x <= P1.x + P1.w)) && ((y >= P1.y) && y <= P1.y + P1.h))
+            {
+                currentHoldObject = 1;
+            }
+            else if (((x >= P2.x) && (x <= P2.x + P2.w)) && ((y >= P2.y) && y <= P2.y + P2.h))
+            {
+                currentHoldObject = 2;
+            }
+            else if (((x >= P3.x) && (x <= P3.x + P3.w)) && ((y >= P3.y) && y <= P3.y + P3.h))
+            {
+
+                currentHoldObject = 3;
+            }
+            else
+            {
+                currentHoldObject = -1;
+            }
+            //std::cout << currentHoldObject << " HOLD\n";
         }
         break;
     default:
@@ -266,13 +196,72 @@ void handleEvents()
 
 void Update()
 {
-    SDL_GetMouseState(&mouse_x, &mouse_y);
+    SDL_GetMouseState(&x, &y);
+    
+    if (mouseDown == true)
+    {
+        if (currentHoldObject == 0)
+        {
+            P0.x = x - (P0.w / 2);
+            P0.y = y - (P0.h / 2);
+        }
+        else if (currentHoldObject == 1)
+        {
+            P1.x = x - (P1.w / 2);
+            P1.y = y - (P1.h / 2);
+        }
+        else if (currentHoldObject == 2)
+        {
+            P2.x = x - (P2.w / 2);
+            P2.y = y - (P2.h / 2);
+        }
+        else if (currentHoldObject == 3)
+        {
+            P3.x = x - (P3.w / 2);
+            P3.y = y - (P3.h / 2);
+        }
+    }
 }
 
 void Render()
 {
     SDL_RenderClear(renderer);
     // Rendering n shit;
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    for (float i = 0; i < 1; i += 0.001)
+    {
+        int xa = getPt(P0.x, P1.x, i);
+        int ya = getPt(P0.y, P1.y, i);
+        int xb = getPt(P1.x, P2.x, i);
+        int yb = getPt(P1.y, P2.y, i);
+        int xc = getPt(P2.x, P3.x, i);
+        int yc = getPt(P2.y, P3.y, i);
+
+        int xm = getPt(xa, xb, i);
+        int ym = getPt(ya, yb, i);
+        int xn = getPt(xb, xc, i);
+        int yn = getPt(yb, yc, i);
+
+        int finalx = getPt(xm, xn, i) + 5;
+        int finaly = getPt(ym, yn, i) + 5;
+
+        SDL_RenderDrawPoint(renderer, finalx, finaly);
+    }
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
+
+    SDL_RenderDrawLine(renderer, P0.x + P0.w / 2, P0.y + P0.h / 2, P1.x + P1.w / 2, P1.y + P1.h / 2);
+    SDL_RenderDrawLine(renderer, P1.x + P1.w / 2, P1.y + P1.h / 2, P2.x + P2.w / 2, P2.y + P2.h / 2);
+    SDL_RenderDrawLine(renderer, P2.x + P2.w / 2, P2.y + P2.h / 2, P3.x + P3.w / 2, P3.y + P3.h / 2);
+
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+
+    SDL_RenderFillRect(renderer, &P0);
+    SDL_RenderFillRect(renderer, &P1);
+    SDL_RenderFillRect(renderer, &P2);
+    SDL_RenderFillRect(renderer, &P3);
 
     SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
 
